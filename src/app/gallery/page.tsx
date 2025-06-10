@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Filter, Grid } from 'lucide-react'
 import { getAllArtworks, getCategories, getPrimaryImageUrl } from '@/lib/supabase/services'
 import type { ArtworkWithImages } from '@/types/database'
+import { ArtworkImage } from '@/components/ui/artwork-image'
 
 export const metadata: Metadata = {
   title: '作品ギャラリー | Kari Gallery',
@@ -118,21 +119,17 @@ function ArtworkCard({ artwork }: { artwork: ArtworkWithImages }) {
     >
       <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-100">
         {/* 作品画像 */}
-        <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center relative overflow-hidden">
+        <div className="aspect-square relative overflow-hidden">
           {artwork.is_featured && (
             <div className="absolute top-3 left-3 bg-blue-500 text-white text-xs px-2 py-1 rounded-full z-10">
               注目作品
             </div>
           )}
-          {primaryImageUrl !== '/placeholder-artwork.jpg' ? (
-            <img
-              src={primaryImageUrl}
-              alt={artwork.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-          ) : (
-            <span className="text-gray-400 text-sm">作品画像</span>
-          )}
+          <ArtworkImage
+            src={primaryImageUrl}
+            alt={artwork.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
         </div>
 
         {/* 作品情報 */}
