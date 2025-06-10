@@ -16,6 +16,16 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "**",
       },
+      // Supabase Storage
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+      },
+      // Netlify CDN
+      {
+        protocol: "https",
+        hostname: "*.netlify.app",
+      },
     ],
   },
   // TypeScript設定
@@ -26,10 +36,13 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: false,
   },
-  // Windows環境での問題を回避（standaloneモードを無効化）
-  // experimental: {},
-  // Netlify最適化（Windows環境では一時的に無効化）
-  // output: "standalone",
+  // Netlify最適化設定
+  trailingSlash: false,
+  reactStrictMode: true,
+  // 環境変数の暴露設定
+  env: {
+    CUSTOM_KEY: process.env.CUSTOM_KEY,
+  },
 };
 
 export default nextConfig;

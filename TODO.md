@@ -35,8 +35,9 @@
 - [x] ESLint + Prettier設定
 - [x] TypeScript strict mode設定
 
-### **環境設定・デプロイ準備**
+### **環境設定・デプロイ準備** 🔧
 - [x] GitHub リポジトリ作成・初期プッシュ
+- [x] CSS/Tailwind CSS環境構築 ✅ v3.4安定版で完全動作
 - [ ] Supabaseプロジェクト作成
   - [ ] 無料プランで新規プロジェクト作成
   - [ ] データベースURL・APIキー取得
@@ -133,10 +134,19 @@
   - [x] カートに戻る・チェックアウトリンク
   - [x] 購入ガイド・お問い合わせセクション
 
-#### **Stripe決済連携**
-- [ ] Stripe Checkout実装
-- [ ] `/api/create-checkout-session` APIルート
-- [ ] 成功ページ (`app/success/page.tsx`)
+#### **Stripe決済連携** 🚀
+- [x] チェックアウトページ (`app/checkout/page.tsx`) ✅ 完全実装
+  - [x] 配送先情報フォーム
+  - [x] 支払い方法選択（カード・銀行振込）
+  - [x] 注文サマリー・価格計算
+  - [x] 利用規約同意・セキュリティ表示
+- [x] 成功ページ (`app/success/page.tsx`) ✅ 完全実装
+  - [x] 注文確認詳細表示
+  - [x] 配送先情報確認
+  - [x] 今後の流れ・ステップ表示
+  - [x] サポート情報・お問い合わせ
+- [x] `/api/create-checkout-session` APIルート基本実装
+- [ ] Stripe環境変数設定・テスト
 - [ ] キャンセルページ処理
 - [ ] Webhook設定 (`/api/stripe-webhooks`)
   - [ ] 署名検証
@@ -166,12 +176,20 @@
 - [ ] 顧客情報表示
 
 ### **Netlify デプロイ**
-- [ ] OpenNext adapter設定
-- [ ] `next.config.ts` Netlify用設定
-- [ ] ビルド設定 (`netlify.toml`)
-- [ ] 環境変数設定
-- [ ] ドメイン設定
-- [ ] SSL証明書設定
+- [x] OpenNext adapter設定（@netlify/plugin-nextjs追加）
+- [x] `next.config.ts` Netlify用設定
+- [x] ビルド設定 (`netlify.toml`) 完全設定
+  - [x] ビルドコマンド・公開ディレクトリ設定
+  - [x] セキュリティヘッダー設定
+  - [x] キャッシュ設定（静的アセット・API）
+  - [x] リダイレクト設定（SPA対応）
+- [x] 環境変数設定ガイド作成 (`docs/netlify-setup.md`)
+- [x] デプロイスクリプト追加（package.json）
+- [ ] 実際のNetlifyサイト作成・接続
+- [ ] 環境変数をNetlify UIで設定
+- [ ] 初回デプロイ・動作確認
+- [ ] ドメイン設定（オプション）
+- [ ] SSL証明書設定（自動）
 
 ---
 
