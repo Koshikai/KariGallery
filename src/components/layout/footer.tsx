@@ -22,7 +22,7 @@ export function Footer() {
                 <Mail className="h-5 w-5" />
               </a>
               <a
-                href="https://instagram.com/karigallery"
+                href="https://instagram.com/smfl3247"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-gray-600 transition-colors"
