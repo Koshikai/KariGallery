@@ -32,8 +32,8 @@ export function ArtworkImage({
     setLoading(false)
   }
 
-  // エラーまたはプレースホルダーの場合はプレースホルダーSVGを表示
-  if (error || src === '/placeholder-artwork.svg') {
+  // エラーまたは空URLの場合はプレースホルダーを表示
+  if (error || !src) {
     return (
       <div className={`flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 ${className}`}>
         <div className="text-center">

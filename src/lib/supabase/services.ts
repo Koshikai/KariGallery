@@ -201,7 +201,8 @@ export async function getCategories(): Promise<string[]> {
 // 作品のメイン画像URLを取得するヘルパー関数
 export function getPrimaryImageUrl(artwork: ArtworkWithImages): string {
   const primaryImage = artwork.artwork_images?.find(img => img.is_primary)
-  return primaryImage?.image_url || '/placeholder-artwork.svg'
+  // 実画像が利用可能になったため、フォールバックは基本的に不要
+  return primaryImage?.image_url || ''
 }
 
 // 作品の全画像URLを取得するヘルパー関数
