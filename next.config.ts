@@ -1,14 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    // Next.js 15の新機能を活用
-    turbo: {
-      rules: {
-        "*.svg": {
-          loaders: ["@svgr/webpack"],
-          as: "*.js",
-        },
+  // Turbopack設定（experimental.turboは非推奨）
+  turbopack: {
+    rules: {
+      "*.svg": {
+        loaders: ["@svgr/webpack"],
+        as: "*.js",
       },
     },
   },
@@ -28,8 +26,10 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: false,
   },
-  // Netlify最適化
-  output: "standalone",
+  // Windows環境での問題を回避（standaloneモードを無効化）
+  // experimental: {},
+  // Netlify最適化（Windows環境では一時的に無効化）
+  // output: "standalone",
 };
 
 export default nextConfig;
