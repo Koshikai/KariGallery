@@ -1,8 +1,13 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Palette, Heart, Sparkles } from 'lucide-react'
+import { getFeaturedArtworks, getPrimaryImageUrl } from '@/lib/supabase/services'
+import type { ArtworkWithImages } from '@/types/database'
 
-export default function Home() {
+export default async function Home() {
+  // 注目作品を取得（最大3件）
+  const featuredArtworks = await getFeaturedArtworks(3)
+
   return (
     <div className="space-y-16">
       {/* ヒーローセクション */}
@@ -96,34 +101,30 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 最新作品セクション */}
+      {/* 注目作品セクション */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-8">
             <div className="space-y-4">
               <h2 className="text-3xl font-bold text-gray-900">
-                最新作品
+                注目作品
               </h2>
               <p className="text-lg text-gray-600">
-                新しく制作された作品をご紹介
+                特に注目していただきたい作品をご紹介
               </p>
             </div>
 
-            {/* プレースホルダー：後でSupabaseから作品データを取得 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                  <div className="aspect-square bg-gray-200 flex items-center justify-center">
-                    <span className="text-gray-400">作品画像</span>
-                  </div>
-                  <div className="p-6 space-y-2">
-                    <h3 className="font-semibold text-gray-900">作品タイトル {i}</h3>
-                    <p className="text-sm text-gray-600">水彩・紙本</p>
-                    <p className="text-lg font-bold text-gray-900">¥50,000</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {featuredArtworks.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {featuredArtworks.map((artwork) => (
+                  <FeaturedArtworkCard key={artwork.id} artwork={artwork} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-600">注目作品の準備中です。しばらくお待ちください。</p>
+              </div>
+            )}
 
             <div className="pt-8">
               <Button asChild variant="outline" size="lg">
@@ -166,5 +167,47 @@ export default function Home() {
         </div>
       </section>
     </div>
+  )
+}
+
+// 注目作品カードコンポーネント
+function FeaturedArtworkCard({ artwork }: { artwork: ArtworkWithImages }) {
+  const primaryImageUrl = getPrimaryImageUrl(artwork)
+  
+  return (
+    <Link href={`/artwork/${artwork.slug}`} className="group">
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300">
+        <div className="aspect-square bg-gray-200 flex items-center justify-center relative overflow-hidden">
+          <div className="absolute top-3 left-3 bg-blue-500 text-white text-xs px-2 py-1 rounded-full z-10">
+            注目作品
+          </div>
+          {primaryImageUrl !== '/placeholder-artwork.jpg' ? (
+            <img
+              src={primaryImageUrl}
+              alt={artwork.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          ) : (
+            <span className="text-gray-400">作品画像</span>
+          )}
+        </div>
+        <div className="p-6 space-y-2">
+          <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+            {artwork.title}
+          </h3>
+          <p className="text-sm text-gray-600">
+            {artwork.medium} | {artwork.year_created}年
+          </p>
+          <div className="flex justify-between items-center pt-2">
+            <p className="text-lg font-bold text-gray-900">
+              ¥{artwork.price.toLocaleString()}
+            </p>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              販売中
+            </span>
+          </div>
+        </div>
+      </div>
+    </Link>
   )
 }

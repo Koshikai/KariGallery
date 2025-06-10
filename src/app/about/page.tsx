@@ -31,9 +31,9 @@ export default function AboutPage() {
             <div className="space-y-6">
               <div className="space-y-4">
                 <h1 className="text-4xl lg:text-5xl font-bold text-gray-900">
-                  山田 花梨
+                  草刈 壮
                   <span className="block text-xl lg:text-2xl font-normal text-gray-600 mt-2">
-                    Kari Yamada
+                    Sou Kusakari
                   </span>
                 </h1>
                 <p className="text-lg text-gray-600 leading-relaxed">

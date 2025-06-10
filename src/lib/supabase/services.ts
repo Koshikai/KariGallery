@@ -1,0 +1,210 @@
+import { supabase } from './client'
+import type { Artwork, ArtworkWithImages, ArtworkImage, ArtistProfile } from '@/types/database'
+
+// アーティストプロフィールを取得
+export async function getArtistProfile(): Promise<ArtistProfile | null> {
+  try {
+    const { data, error } = await supabase
+      .from('artist_profile')
+      .select('*')
+      .single()
+    
+    if (error) {
+      console.error('アーティストプロフィール取得エラー:', error)
+      return null
+    }
+    
+    return data
+  } catch (error) {
+    console.error('アーティストプロフィール取得エラー:', error)
+    return null
+  }
+}
+
+// すべての作品を取得（画像付き）
+export async function getAllArtworks(): Promise<ArtworkWithImages[]> {
+  try {
+    const { data, error } = await supabase
+      .from('artworks')
+      .select(`
+        *,
+        artwork_images (*)
+      `)
+      .order('display_order', { ascending: true })
+      .order('created_at', { ascending: false })
+    
+    if (error) {
+      console.error('作品一覧取得エラー:', error)
+      return []
+    }
+    
+    return data || []
+  } catch (error) {
+    console.error('作品一覧取得エラー:', error)
+    return []
+  }
+}
+
+// 販売中の作品のみを取得
+export async function getAvailableArtworks(): Promise<ArtworkWithImages[]> {
+  try {
+    const { data, error } = await supabase
+      .from('artworks')
+      .select(`
+        *,
+        artwork_images (*)
+      `)
+      .eq('is_available', true)
+      .order('display_order', { ascending: true })
+      .order('created_at', { ascending: false })
+    
+    if (error) {
+      console.error('販売中作品取得エラー:', error)
+      return []
+    }
+    
+    return data || []
+  } catch (error) {
+    console.error('販売中作品取得エラー:', error)
+    return []
+  }
+}
+
+// 特定のカテゴリの作品を取得
+export async function getArtworksByCategory(category: string): Promise<ArtworkWithImages[]> {
+  try {
+    const { data, error } = await supabase
+      .from('artworks')
+      .select(`
+        *,
+        artwork_images (*)
+      `)
+      .eq('category', category)
+      .order('display_order', { ascending: true })
+      .order('created_at', { ascending: false })
+    
+    if (error) {
+      console.error(`カテゴリ${category}の作品取得エラー:`, error)
+      return []
+    }
+    
+    return data || []
+  } catch (error) {
+    console.error(`カテゴリ${category}の作品取得エラー:`, error)
+    return []
+  }
+}
+
+// スラグで特定の作品を取得（画像付き）
+export async function getArtworkBySlug(slug: string): Promise<ArtworkWithImages | null> {
+  try {
+    const { data, error } = await supabase
+      .from('artworks')
+      .select(`
+        *,
+        artwork_images (*)
+      `)
+      .eq('slug', slug)
+      .single()
+    
+    if (error) {
+      console.error(`作品(${slug})取得エラー:`, error)
+      return null
+    }
+    
+    return data
+  } catch (error) {
+    console.error(`作品(${slug})取得エラー:`, error)
+    return null
+  }
+}
+
+// 同じカテゴリの関連作品を取得（指定された作品を除く）
+export async function getRelatedArtworks(
+  currentArtworkId: string, 
+  category: string, 
+  limit: number = 3
+): Promise<ArtworkWithImages[]> {
+  try {
+    const { data, error } = await supabase
+      .from('artworks')
+      .select(`
+        *,
+        artwork_images (*)
+      `)
+      .eq('category', category)
+      .neq('id', currentArtworkId)
+      .eq('is_available', true)
+      .order('display_order', { ascending: true })
+      .limit(limit)
+    
+    if (error) {
+      console.error('関連作品取得エラー:', error)
+      return []
+    }
+    
+    return data || []
+  } catch (error) {
+    console.error('関連作品取得エラー:', error)
+    return []
+  }
+}
+
+// 注目作品を取得
+export async function getFeaturedArtworks(limit: number = 6): Promise<ArtworkWithImages[]> {
+  try {
+    const { data, error } = await supabase
+      .from('artworks')
+      .select(`
+        *,
+        artwork_images (*)
+      `)
+      .eq('is_featured', true)
+      .eq('is_available', true)
+      .order('display_order', { ascending: true })
+      .limit(limit)
+    
+    if (error) {
+      console.error('注目作品取得エラー:', error)
+      return []
+    }
+    
+    return data || []
+  } catch (error) {
+    console.error('注目作品取得エラー:', error)
+    return []
+  }
+}
+
+// 作品のカテゴリ一覧を取得
+export async function getCategories(): Promise<string[]> {
+  try {
+    const { data, error } = await supabase
+      .from('artworks')
+      .select('category')
+      .not('category', 'is', null)
+    
+    if (error) {
+      console.error('カテゴリ取得エラー:', error)
+      return []
+    }
+    
+    // 重複を削除してソート
+    const categories = [...new Set(data.map(item => item.category).filter(Boolean))]
+    return categories.sort()
+  } catch (error) {
+    console.error('カテゴリ取得エラー:', error)
+    return []
+  }
+}
+
+// 作品のメイン画像URLを取得するヘルパー関数
+export function getPrimaryImageUrl(artwork: ArtworkWithImages): string {
+  const primaryImage = artwork.artwork_images?.find(img => img.is_primary)
+  return primaryImage?.image_url || '/placeholder-artwork.jpg'
+}
+
+// 作品の全画像URLを取得するヘルパー関数
+export function getAllImageUrls(artwork: ArtworkWithImages): ArtworkImage[] {
+  return artwork.artwork_images?.sort((a, b) => a.display_order - b.display_order) || []
+} 
