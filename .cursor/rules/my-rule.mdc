@@ -1,0 +1,134 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# プロジェクトルール
+
+## プロジェクト概要
+Next.js 15 + Supabase + Netlify + Stripe を使用したアート作品販売サイトの構築ガイド  
+詳細は `requirements.md` を参照
+
+## 技術スタック
+- **Next.js 15**: App Router + React 19対応
+- **Netlify**: OpenNext adapter使用、Edge Functions対応
+- **Supabase**: Database, Auth, Storage
+- **Stripe**: 決済処理
+- **shadcn/ui v2**: UIコンポーネント
+
+## 利用可能なMCPサーバー
+- **Supabase MCP**: Supabaseプロジェクトの管理、データベース操作、エッジファンクション等の直接操作が可能
+- **Context7 MCP**: ライブラリドキュメントの検索・取得による最新の技術情報アクセス
+
+## 自動ドキュメント管理
+
+### 実行内容
+- プロジェクトドキュメント（`requirements.md`、`docs/`フォルダ等）の定期チェック・更新
+- 技術スタック（Next.js 15、React 19、Supabase、Netlify、Stripe）の最新情報反映
+- MCP（Supabase MCP、Context7 MCP）を活用した技術情報の自動収集・更新
+- Next.js 15固有の破壊的変更・新機能への対応
+- リンク切れや情報の古さを検出・修正
+
+### 更新トリガー
+- **コード変更時**: 実装とドキュメントの整合性確認
+- **外部サービス変更時**: 料金・利用規約・API変更の反映
+- **月次メンテナンス**: 全体的なレビューと更新
+- **MCP情報更新時**: 各MCPサーバーからの最新情報反映
+
+### 重点監視項目
+- 📊 **料金情報**: 各サービスの無料利用枠制限
+- 📋 **利用規約**: Netlifyの商用利用可能性確認
+- 🔧 **API変更**: Next.js 15、React 19の新機能・非推奨機能
+- 🔒 **セキュリティ**: 脆弱性・新要件
+- 🤖 **MCP機能**: Supabase MCP、Context7 MCPの新機能・変更点
+- ⚡ **破壊的変更**: Next.js 15のPromise化API、キャッシュ動作変更
+
+### 緊急対応項目
+- セキュリティ脆弱性
+- 重要なAPI廃止
+- 利用規約の重大変更
+- 料金体系の大幅変更
+
+### 更新原則
+- 公式ドキュメント優先
+- MCPサーバーからの情報活用
+- 相互参照リンクの整合性維持
+- 変更理由と日付の記録
+
+具体的な更新対象ファイルや詳細なチェック項目は `docs/` フォルダ内の各ドキュメントを参照してください。
+
+## Next.js 15 実装ガイドライン
+
+### 必須対応事項
+1. **非同期API対応**
+   ```typescript
+   // ❌ Next.js 14以前
+   export default function Page({ params, searchParams }) {
+     const { slug } = params
+     const { query } = searchParams
+   }
+   
+   // ✅ Next.js 15
+   export default async function Page(props) {
+     const params = await props.params
+     const searchParams = await props.searchParams
+     const { slug } = params
+     const { query } = searchParams
+   }
+   ```
+
+2. **Route Handlers**
+   ```typescript
+   // ✅ キャッシュが必要な場合
+   export const dynamic = 'force-static'
+   export async function GET() {
+     // GET処理
+   }
+   ```
+
+3. **Headers/Cookies**
+   ```typescript
+   // ✅ Next.js 15対応
+   import { headers, cookies } from 'next/headers'
+   
+   export default async function Component() {
+     const headersList = await headers()
+     const cookieStore = await cookies()
+   }
+   ```
+
+### Netlify対応設定
+- OpenNext adapterが自動適用
+- Image CDN自動最適化
+- Edge Functions対応（Middleware）
+- 環境変数設定必須：NEXT_PUBLIC_SUPABASE_URL, STRIPE_SECRET_KEY等
+
+### 推奨ディレクトリ構造（Next.js 15 App Router）
+```
+src/app/
+├── layout.tsx          # Root Layout
+├── page.tsx           # ホームページ
+├── about/page.tsx     # アーティスト紹介
+├── gallery/page.tsx   # 作品一覧
+├── artwork/
+│   └── [slug]/page.tsx # 個別作品ページ
+├── api/
+│   ├── artworks/route.ts
+│   └── webhooks/stripe/route.ts
+└── globals.css
+```
+
+### パフォーマンス最適化
+- `next/image`でNetlify Image CDN活用
+- Server Components優先使用
+- 必要な箇所のみClient Components化
+- Suspense境界の適切な配置
+
+
+
+
+
+
+
+
+
