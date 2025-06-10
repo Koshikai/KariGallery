@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Palette, Heart, Sparkles } from 'lucide-react'
 import { getFeaturedArtworks, getPrimaryImageUrl } from '@/lib/supabase/services'
@@ -182,10 +183,13 @@ function FeaturedArtworkCard({ artwork }: { artwork: ArtworkWithImages }) {
             注目作品
           </div>
           {primaryImageUrl !== '/placeholder-artwork.jpg' ? (
-            <img
+            <Image
               src={primaryImageUrl}
               alt={artwork.title}
+              width={400}
+              height={400}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              priority
             />
           ) : (
             <span className="text-gray-400">作品画像</span>

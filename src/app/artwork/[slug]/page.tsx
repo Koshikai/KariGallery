@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, Heart, Share2, Ruler, Calendar, Palette, ShoppingCart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -91,13 +92,15 @@ export default async function ArtworkPage(props: ArtworkPageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* 画像セクション */}
           <div className="space-y-6">
-            {/* メイン画像 */}
-            <div className="aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden shadow-lg">
+            {/* メイン画像 */}            <div className="aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden shadow-lg">
               {primaryImageUrl !== '/placeholder-artwork.jpg' ? (
-                <img
+                <Image
                   src={primaryImageUrl}
                   alt={artwork.title}
+                  width={600}
+                  height={450}
                   className="w-full h-full object-cover"
+                  priority
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
@@ -113,10 +116,11 @@ export default async function ArtworkPage(props: ArtworkPageProps) {
                   <div
                     key={image.id}
                     className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-                  >
-                    <img
+                  >                    <Image
                       src={image.image_url}
                       alt={image.alt_text || artwork.title}
+                      width={200}
+                      height={200}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -279,11 +283,12 @@ function RelatedArtworkCard({ artwork }: { artwork: ArtworkWithImages }) {
   return (
     <Link href={`/artwork/${artwork.slug}`} className="group">
       <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-100">
-        <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-          {primaryImageUrl !== '/placeholder-artwork.jpg' ? (
-            <img
+        <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">          {primaryImageUrl !== '/placeholder-artwork.jpg' ? (
+            <Image
               src={primaryImageUrl}
               alt={artwork.title}
+              width={300}
+              height={300}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
           ) : (

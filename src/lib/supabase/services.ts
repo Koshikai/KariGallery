@@ -1,5 +1,5 @@
 import { supabase } from './client'
-import type { Artwork, ArtworkWithImages, ArtworkImage, ArtistProfile } from '@/types/database'
+import type { ArtworkWithImages, ArtworkImage, ArtistProfile } from '@/types/database'
 
 // アーティストプロフィールを取得
 export async function getArtistProfile(): Promise<ArtistProfile | null> {

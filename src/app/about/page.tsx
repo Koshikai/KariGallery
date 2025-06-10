@@ -72,7 +72,7 @@ export default function AboutPage() {
                   </a>
                 </Button>
                 <Button variant="outline" size="sm" asChild>
-                  <a href="https://instagram.com/karigallery" target="_blank" rel="noopener noreferrer" className="flex items-center">
+                  <a href="https://instagram.com/smfl3247" target="_blank" rel="noopener noreferrer" className="flex items-center">
                     <Instagram className="h-4 w-4 mr-2" />
                     Instagram
                   </a>
