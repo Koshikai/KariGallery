@@ -1,0 +1,77 @@
+# Netlify設定ファイル - KariGallery
+# Next.js 15 + Supabase + Stripe アート販売サイト
+
+[build]
+  # ビルドコマンド
+  command = "pnpm build"
+  
+  # 公開ディレクトリ（Next.js 15のデフォルト）
+  publish = ".next"
+  
+  # プロジェクトのベースディレクトリ
+  base = "."
+
+# Next.js用プラグイン（必須）
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# 本番環境設定
+[context.production]
+  command = "pnpm build"
+  publish = ".next"
+
+# プレビュー環境設定（プルリクエスト）
+[context.deploy-preview]
+  command = "pnpm build"
+  publish = ".next"
+
+# ブランチデプロイ設定
+[context.branch-deploy]
+  command = "pnpm build"
+  publish = ".next"
+
+# リダイレクト設定（SPAルーティング対応）
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# セキュリティヘッダー設定
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+# API ルート用設定
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-store"
+
+# 静的アセット用キャッシュ設定
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# 画像ファイル用キャッシュ設定
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+# フォント用キャッシュ設定
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Stripe Webhook用設定（特別なヘッダー処理）
+[[headers]]
+  for = "/api/webhooks/stripe"
+  [headers.values]
+    Cache-Control = "no-store"
