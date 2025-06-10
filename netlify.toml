@@ -11,6 +11,12 @@
   # プロジェクトのベースディレクトリ
   base = "."
 
+# Supabase ANON KEYはパブリック使用が前提のため、シークレットスキャンから除外
+[build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SUPABASE_ANON_KEY"
+  # ビルドキャッシュファイルをスキャンから除外
+  SECRETS_SCAN_OMIT_PATHS = ".next/cache/**,.netlify/**"
+
 # Next.js用プラグイン（必須）
 [[plugins]]
   package = "@netlify/plugin-nextjs"
