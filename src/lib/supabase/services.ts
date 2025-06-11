@@ -208,4 +208,125 @@ export function getPrimaryImageUrl(artwork: ArtworkWithImages): string {
 // 作品の全画像URLを取得するヘルパー関数
 export function getAllImageUrls(artwork: ArtworkWithImages): ArtworkImage[] {
   return artwork.artwork_images?.sort((a, b) => a.display_order - b.display_order) || []
+}
+
+// 作品の個別取得
+export async function getArtworkById(id: string): Promise<ArtworkWithImages | null> {
+  try {
+    const { data, error } = await supabase
+      .from('artworks')
+      .select(`
+        *,
+        images:artwork_images(*)
+      `)
+      .eq('id', id)
+      .single()
+
+    if (error) {
+      console.error('Error fetching artwork by ID:', error)
+      return null
+    }
+
+    return data as ArtworkWithImages
+  } catch (error) {
+    console.error('Error in getArtworkById:', error)
+    return null
+  }
+}
+
+// 作品の更新
+export async function updateArtwork(id: string, updates: Partial<{
+  title: string
+  description: string
+  price: number
+  size: string
+  medium: string
+  year: number
+  status: string
+  category: string
+}>): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('artworks')
+      .update(updates)
+      .eq('id', id)
+
+    if (error) {
+      console.error('Error updating artwork:', error)
+      return false
+    }
+
+    return true
+  } catch (error) {
+    console.error('Error in updateArtwork:', error)
+    return false
+  }
+}
+
+// 作品の削除
+export async function deleteArtwork(id: string): Promise<boolean> {
+  try {
+    // まず関連する画像を削除
+    const { error: imageError } = await supabase
+      .from('artwork_images')
+      .delete()
+      .eq('artwork_id', id)
+
+    if (imageError) {
+      console.error('Error deleting artwork images:', imageError)
+      return false
+    }
+
+    // 次に作品を削除
+    const { error } = await supabase
+      .from('artworks')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      console.error('Error deleting artwork:', error)
+      return false
+    }
+
+    return true
+  } catch (error) {
+    console.error('Error in deleteArtwork:', error)
+    return false
+  }
+}
+
+// 作品の新規作成
+export async function createArtwork(artworkData: {
+  title: string
+  slug: string
+  description?: string
+  price: number
+  width?: number | null
+  height?: number | null
+  medium?: string
+  year_created?: number
+  category?: string
+  is_available?: boolean
+  is_featured?: boolean
+}): Promise<string | null> {
+  try {
+    const { data, error } = await supabase
+      .from('artworks')
+      .insert([{
+        ...artworkData,
+        display_order: 0 // デフォルトの表示順序
+      }])
+      .select('id')
+      .single()
+
+    if (error) {
+      console.error('Error creating artwork:', error)
+      return null
+    }
+
+    return data.id
+  } catch (error) {
+    console.error('Error in createArtwork:', error)
+    return null
+  }
 } 
