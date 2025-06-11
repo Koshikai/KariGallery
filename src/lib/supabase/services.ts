@@ -329,4 +329,102 @@ export async function createArtwork(artworkData: {
     console.error('Error in createArtwork:', error)
     return null
   }
+}
+
+// 画像アップロード機能
+export async function uploadArtworkImage(file: File, artworkId: string): Promise<string | null> {
+  try {
+    // ファイル名を生成（タイムスタンプ + オリジナル名）
+    const timestamp = Date.now()
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${artworkId}/${timestamp}.${fileExt}`
+
+    // Supabase Storageにアップロード
+    const { error } = await supabase.storage
+      .from('artwork-images')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      })
+
+    if (error) {
+      console.error('Error uploading image:', error)
+      return null
+    }
+
+    // アップロードされた画像のパブリックURLを取得
+    const { data: urlData } = supabase.storage
+      .from('artwork-images')
+      .getPublicUrl(fileName)
+
+    return urlData.publicUrl
+  } catch (error) {
+    console.error('Error in uploadArtworkImage:', error)
+    return null
+  }
+}
+
+// 作品に画像を関連付け
+export async function addArtworkImage(artworkId: string, imageUrl: string, displayOrder: number = 0): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('artwork_images')
+      .insert([{
+        artwork_id: artworkId,
+        image_url: imageUrl,
+        display_order: displayOrder,
+        is_primary: displayOrder === 0 // 最初の画像をプライマリに設定
+      }])
+
+    if (error) {
+      console.error('Error adding artwork image:', error)
+      return false
+    }
+
+    return true
+  } catch (error) {
+    console.error('Error in addArtworkImage:', error)
+    return false
+  }
+}
+
+// 作品画像を削除
+export async function deleteArtworkImage(imageId: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('artwork_images')
+      .delete()
+      .eq('id', imageId)
+
+    if (error) {
+      console.error('Error deleting artwork image:', error)
+      return false
+    }
+
+    return true
+  } catch (error) {
+    console.error('Error in deleteArtworkImage:', error)
+    return false
+  }
+}
+
+// 作品の画像一覧を取得
+export async function getArtworkImages(artworkId: string) {
+  try {
+    const { data, error } = await supabase
+      .from('artwork_images')
+      .select('*')
+      .eq('artwork_id', artworkId)
+      .order('display_order', { ascending: true })
+
+    if (error) {
+      console.error('Error fetching artwork images:', error)
+      return []
+    }
+
+    return data || []
+  } catch (error) {
+    console.error('Error in getArtworkImages:', error)
+    return []
+  }
 } 

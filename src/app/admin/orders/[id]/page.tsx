@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Package, User, MapPin, CreditCard, Calendar } from 'lucide-react'
 import Link from 'next/link'
@@ -45,7 +45,13 @@ interface Order {
   customer_name: string
   customer_email: string
   customer_phone: string | null
-  shipping_address: any
+  shipping_address: {
+    postal_code: string
+    prefecture: string
+    city: string
+    address: string
+    building?: string
+  }
   total_amount: number
   status: string
   notes: string | null
@@ -66,7 +72,6 @@ interface OrderItem {
 }
 
 export default function AdminOrderDetailPage() {
-  const router = useRouter()
   const params = useParams()
   const orderId = params.id as string
 

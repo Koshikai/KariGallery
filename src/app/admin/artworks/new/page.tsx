@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, Save, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { createArtwork } from '@/lib/supabase/services'
+import { ImageUpload } from '@/components/admin/image-upload'
 
 // 簡単なUIコンポーネント
 const Input = ({ className = '', ...props }: React.InputHTMLAttributes<HTMLInputElement>) => (
@@ -26,12 +27,7 @@ const Label = ({ className = '', ...props }: React.LabelHTMLAttributes<HTMLLabel
   <label className={`block text-sm font-medium text-gray-700 mb-1 ${className}`} {...props} />
 )
 
-const Select = ({ className = '', ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) => (
-  <select
-    className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${className}`}
-    {...props}
-  />
-)
+
 
 const Alert = ({ variant = 'default', className = '', children, ...props }: React.HTMLAttributes<HTMLDivElement> & { variant?: 'default' | 'destructive' | 'success' }) => (
   <div 
@@ -85,6 +81,8 @@ export default function NewArtworkPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [createdArtworkId, setCreatedArtworkId] = useState<string | null>(null)
+  const [showImageUpload, setShowImageUpload] = useState(false)
 
   // フォームデータの更新
   const handleInputChange = (field: keyof FormData, value: string | number | boolean | null) => {
@@ -120,12 +118,9 @@ export default function NewArtworkPage() {
       const artworkId = await createArtwork(formData)
       
       if (artworkId) {
-        setSuccess('作品を作成しました')
-        
-        // 2秒後に一覧画面に戻る
-        setTimeout(() => {
-          router.push('/admin/artworks')
-        }, 2000)
+        setCreatedArtworkId(artworkId)
+        setSuccess('作品を作成しました。続けて画像をアップロードしてください。')
+        setShowImageUpload(true)
       } else {
         setError('作品の作成に失敗しました')
       }
@@ -135,6 +130,21 @@ export default function NewArtworkPage() {
     } finally {
       setIsSaving(false)
     }
+  }
+
+  // 画像アップロード完了時
+  const handleImageUploaded = () => {
+    // 画像がアップロードされた時の処理（必要に応じて追加）
+  }
+
+  // 画像アップロードエラー時
+  const handleImageUploadError = (errorMessage: string) => {
+    setError(errorMessage)
+  }
+
+  // 完了ボタン
+  const handleFinish = () => {
+    router.push('/admin/artworks')
   }
 
   return (
@@ -307,27 +317,50 @@ export default function NewArtworkPage() {
             )}
 
             {/* 送信ボタン */}
-            <div className="flex justify-end space-x-4">
-              <Link href="/admin/artworks">
-                <Button type="button" variant="outline">
-                  キャンセル
+            {!showImageUpload && (
+              <div className="flex justify-end space-x-4">
+                <Link href="/admin/artworks">
+                  <Button type="button" variant="outline">
+                    キャンセル
+                  </Button>
+                </Link>
+                <Button type="submit" disabled={isSaving}>
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      作成中...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      作成
+                    </>
+                  )}
                 </Button>
-              </Link>
-              <Button type="submit" disabled={isSaving}>
-                {isSaving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    作成中...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    作成
-                  </>
-                )}
-              </Button>
-            </div>
+              </div>
+            )}
           </form>
+
+          {/* 画像アップロードセクション */}
+          {showImageUpload && createdArtworkId && (
+            <div className="mt-8 border-t pt-8">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                作品画像のアップロード
+              </h2>
+              <ImageUpload
+                artworkId={createdArtworkId}
+                onImageUploaded={handleImageUploaded}
+                onError={handleImageUploadError}
+                maxFiles={5}
+              />
+              
+              <div className="mt-6 flex justify-end">
+                <Button onClick={handleFinish}>
+                  完了
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

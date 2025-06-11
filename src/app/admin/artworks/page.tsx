@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Plus, Pencil, Trash2, Eye } from 'lucide-react'
+import { Plus, Pencil, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ArtworkImage } from '@/components/ui/artwork-image'
 import { getAllArtworks } from '@/lib/supabase/services'

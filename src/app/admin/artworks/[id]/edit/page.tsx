@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Save, Loader2, Upload, X } from 'lucide-react'
+import { ArrowLeft, Save, Loader2 } from 'lucide-react'
 import Link from 'next/link'
-import { getArtworkById, updateArtwork } from '@/lib/supabase/services'
+import { getArtworkById, updateArtwork, getArtworkImages } from '@/lib/supabase/services'
 import type { ArtworkWithImages } from '@/types/database'
+import { ImageUpload } from '@/components/admin/image-upload'
 
 // 簡単なUIコンポーネント
 const Input = ({ className = '', ...props }: React.InputHTMLAttributes<HTMLInputElement>) => (
@@ -75,12 +76,14 @@ export default function EditArtworkPage() {
     title: '',
     description: '',
     price: 0,
-    size: '',
+    width: null,
+    height: null,
     medium: '',
-    year: new Date().getFullYear(),
-    status: 'available',
+    year_created: new Date().getFullYear(),
+    is_available: true,
     category: ''
   })
+  const [existingImages, setExistingImages] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
@@ -98,12 +101,17 @@ export default function EditArtworkPage() {
             title: data.title,
             description: data.description || '',
             price: data.price,
-            size: data.size || '',
+            width: data.width,
+            height: data.height,
             medium: data.medium || '',
-            year: data.year || new Date().getFullYear(),
-            status: data.status as 'available' | 'sold' | 'reserved',
+            year_created: data.year_created || new Date().getFullYear(),
+            is_available: data.is_available,
             category: data.category || ''
           })
+
+          // 既存画像を取得
+          const images = await getArtworkImages(artworkId)
+          setExistingImages(images.map(img => img.image_url))
         } else {
           setError('作品が見つかりません')
         }
@@ -120,11 +128,21 @@ export default function EditArtworkPage() {
   }, [artworkId])
 
   // フォームデータの更新
-  const handleInputChange = (field: keyof FormData, value: string | number) => {
+  const handleInputChange = (field: keyof FormData, value: string | number | boolean | null) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }))
+  }
+
+  // 画像アップロード完了時
+  const handleImageUploaded = (imageUrl: string) => {
+    setExistingImages(prev => [...prev, imageUrl])
+  }
+
+  // 画像アップロードエラー時
+  const handleImageUploadError = (errorMessage: string) => {
+    setError(errorMessage)
   }
 
   // フォーム送信
@@ -235,12 +253,11 @@ export default function EditArtworkPage() {
                   <Label htmlFor="status">ステータス *</Label>
                   <Select
                     id="status"
-                    value={formData.status}
-                    onChange={(e) => handleInputChange('status', e.target.value)}
+                    value={formData.is_available ? 'available' : 'sold'}
+                    onChange={(e) => handleInputChange('is_available', e.target.value === 'available')}
                     required
                   >
                     <option value="available">販売中</option>
-                    <option value="reserved">予約済み</option>
                     <option value="sold">売約済み</option>
                   </Select>
                 </div>
@@ -252,8 +269,12 @@ export default function EditArtworkPage() {
                   <Label htmlFor="size">サイズ</Label>
                   <Input
                     id="size"
-                    value={formData.size}
-                    onChange={(e) => handleInputChange('size', e.target.value)}
+                    value={formData.width ? `${formData.width}×${formData.height}` : ''}
+                    onChange={(e) => {
+                      const [width, height] = e.target.value.split('×').map(Number)
+                      handleInputChange('width', width)
+                      handleInputChange('height', height)
+                    }}
                     placeholder="例: 30×40cm"
                   />
                 </div>
@@ -273,8 +294,8 @@ export default function EditArtworkPage() {
                   <Input
                     id="year"
                     type="number"
-                    value={formData.year}
-                    onChange={(e) => handleInputChange('year', Number(e.target.value))}
+                    value={formData.year_created}
+                    onChange={(e) => handleInputChange('year_created', Number(e.target.value))}
                     min="1900"
                     max={new Date().getFullYear()}
                     placeholder="2024"
@@ -294,22 +315,22 @@ export default function EditArtworkPage() {
             </div>
 
             {/* 現在の画像表示 */}
-            {artwork.images && artwork.images.length > 0 && (
+            {existingImages.length > 0 && (
               <div>
                 <Label>現在の画像</Label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-                                     {artwork.images.map((image: any, index: number) => (
-                     <div key={index} className="relative">
-                       <img
-                         src={image.image_url}
-                         alt={`${artwork.title} - ${index + 1}`}
-                         className="w-full h-32 object-cover rounded-lg border"
-                       />
-                       <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
-                         {index + 1}
-                       </div>
-                     </div>
-                   ))}
+                  {existingImages.map((imageUrl, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={imageUrl}
+                        alt={`${artwork.title} - ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg border"
+                      />
+                      <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                        {index + 1}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -349,6 +370,20 @@ export default function EditArtworkPage() {
               </Button>
             </div>
           </form>
+
+          {/* 画像アップロードセクション */}
+          <div className="mt-8 border-t pt-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              画像の管理
+            </h2>
+            <ImageUpload
+              artworkId={artworkId}
+              onImageUploaded={handleImageUploaded}
+              onError={handleImageUploadError}
+              maxFiles={5}
+              existingImages={existingImages}
+            />
+          </div>
         </div>
       </div>
     </div>
