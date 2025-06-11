@@ -2,7 +2,7 @@
 
 **プロジェクト**: 個人アーティストのためのオンライン作品販売・ポートフォリオサイト  
 **技術スタック**: Next.js 15 + React 19 + Supabase + Netlify + Stripe  
-**最終更新**: 2025年6月11日（Phase 1 MVP完全完成！🎉 本番ビルド成功✨）
+**最終更新**: 2025年6月11日（Phase 1 MVP完全完成！🎉 + Stripe決済実装完了✨）
 
 ---
 
@@ -160,9 +160,16 @@
 ---
 
 ## 🚀 **次のステップ - Phase 2（オプション機能）**
-- [ ] **Stripe決済設定** - 本格販売機能（オプション）
-  - [ ] Stripeアカウント作成・APIキー取得 📖 [詳細ガイド](./docs/stripe-setup-guide.md)
-  - [ ] .env.localへStripeキー設定
+- [x] **Stripe決済完全実装** 🔥 NEW! - 本格販売機能完成！ ✨
+  - [x] チェックアウトページの完全なStripe統合
+  - [x] Stripe APIエンドポイント実装（/api/create-checkout-session）
+  - [x] Webhook処理実装（/api/webhooks/stripe）
+  - [x] カートデータとの連携完了
+  - [x] 顧客情報フォーム・バリデーション
+  - [x] 決済フロー・エラーハンドリング
+- [ ] Stripeアカウント設定・APIキー取得 📖 [詳細ガイド](./docs/stripe-setup-guide.md)
+  - [ ] 実際のStripeアカウント作成
+  - [ ] テストキーから本番キーへの切り替え
   - [ ] 決済テスト・動作確認（テストカード使用）
 - [ ] **Netlify本番デプロイ** - 世界公開（オプション）
   - [ ] Netlifyサイト作成・GitHub接続
