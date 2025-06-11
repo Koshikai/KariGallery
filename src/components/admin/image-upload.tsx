@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback, useRef } from 'react'
 import { Upload, X, ImageIcon, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { uploadArtworkImage, addArtworkImage } from '@/lib/supabase/services'
+import Image from 'next/image'
 
 interface ImageUploadProps {
   artworkId?: string
@@ -228,9 +229,11 @@ export function ImageUpload({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {previewImages.map((imageUrl, index) => (
               <div key={index} className="relative">
-                <img
+                <Image
                   src={imageUrl}
                   alt={`画像 ${index + 1}`}
+                  width={128}
+                  height={128}
                   className="w-full h-32 object-cover rounded-lg border"
                 />
                 <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">

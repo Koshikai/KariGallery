@@ -154,3 +154,48 @@ artwork-images/
 ---
 
 **🎉 本日で Phase 2 の主要機能がほぼ完成しました！次は認証の本格化と Phase 3 への移行準備です。** ✨ 
+
+---
+
+## 📅 2025年6月11日（続き） - 本番環境エラー対応 🚨
+
+### 🎯 **緊急対応課題**
+
+#### **🚨 本番環境（Netlify）でのServer Components エラー**
+- **エラー内容**: GET https://karigallery.netlify.app/admin/artworks 500 (Internal Server Error)
+- **現象**: 本番環境でのみ発生、開発環境では正常動作
+- **エラー詳細**: Server Components renderエラー（詳細は本番ビルドで非表示）
+
+#### **🔍 実施した対応**
+1. **管理画面レスポンシブ対応完了**
+   - モバイルナビゲーション（ハンバーガーメニュー）実装
+   - 作品管理・注文管理ページのモバイル表示対応
+   - Client/Server Component分離実装
+
+2. **作品管理ページClient Component化**
+   - Server Component → 'use client' Client Component へ変更
+   - useEffect + useState でのデータ取得方式に変更
+   - ローディング・エラーハンドリング追加
+
+3. **データベース接続テストページ作成**
+   - Server Component形式での接続テスト実装
+   - 環境変数・Supabase接続状況の詳細表示
+   - エラー情報の詳細取得機能
+
+#### **🔍 継続調査が必要な課題**
+- [ ] 本番環境でのSupabase接続エラーの詳細特定
+- [ ] RLS（Row Level Security）ポリシーの本番適用状況
+- [ ] 環境変数の本番環境での正常設定確認
+- [ ] Server ComponentsのNetlify本番環境での制約・エラー要因
+- [ ] 他の管理画面ページでの同様エラーの可能性
+
+#### **🎯 次のアクション**
+1. Database testページでの本番環境接続確認
+2. エラーログの詳細取得・原因特定
+3. 必要に応じて他管理画面のClient Component化
+4. Supabase RLS設定の再確認・調整
+
+### 📋 **技術課題メモ**
+- Netlify本番環境でのServer Components制約
+- Supabase接続時の環境変数・認証エラー
+- 開発環境と本番環境での動作差異

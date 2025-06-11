@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { getArtworkById, updateArtwork, getArtworkImages } from '@/lib/supabase/services'
 import type { ArtworkWithImages } from '@/types/database'
 import { ImageUpload } from '@/components/admin/image-upload'
+import Image from 'next/image'
 
 // 簡単なUIコンポーネント
 const Input = ({ className = '', ...props }: React.InputHTMLAttributes<HTMLInputElement>) => (
@@ -328,9 +329,11 @@ export default function EditArtworkPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
                   {existingImages.map((imageUrl, index) => (
                     <div key={index} className="relative">
-                      <img
+                      <Image
                         src={imageUrl}
                         alt={`${artwork.title} - ${index + 1}`}
+                        width={128}
+                        height={128}
                         className="w-full h-32 object-cover rounded-lg border"
                       />
                       <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">

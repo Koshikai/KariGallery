@@ -333,6 +333,83 @@ test('optimistic updates work correctly', () => {
 
 ---
 
+## **本番環境エラー対応のベストプラクティス** 🚨 NEW!
+
+### **Server Components vs Client Components の使い分け**
+
+**本番環境でのServer Componentsエラー対策**
+- **現象**: 開発環境では正常、本番環境（Netlify）で500エラー
+- **原因**: ホスティング環境でのServer Components制約、環境変数の差異
+
+**推奨アプローチ**:
+```typescript
+// 管理画面などデータフェッチが複雑なページ
+'use client'
+
+import { useEffect, useState } from 'react'
+
+export default function AdminPage() {
+  const [data, setData] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true)
+        const result = await getDataFromSupabase()
+        setData(result)
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
+  // ローディング・エラー・データ表示の分岐処理
+}
+```
+
+### **デバッグ・エラー追跡**
+
+**段階的な問題特定**
+1. **データベース接続テスト**: `/admin/database-test` ページの作成
+2. **環境変数確認**: 本番環境での設定値検証
+3. **エラーログ収集**: 詳細なエラー情報の取得
+4. **クライアント/サーバー分離**: 問題箇所の特定・修正
+
+**エラーハンドリングの強化**
+```typescript
+// 詳細なエラー情報の取得
+try {
+  const data = await supabase.from('artworks').select('*')
+  if (data.error) throw new Error(data.error.message)
+} catch (err) {
+  console.error('Supabase エラー詳細:', {
+    message: err.message,
+    stack: err.stack,
+    timestamp: new Date().toISOString()
+  })
+  // ユーザー向けエラー表示
+}
+```
+
+### **本番環境特有の考慮事項**
+
+**Netlify固有の制約**
+- Server Componentsの制限的な動作
+- 環境変数の設定方法の違い
+- ビルド時とランタイムでの動作差異
+
+**Supabase接続の最適化**
+- RLS（Row Level Security）ポリシーの本番適用確認
+- APIキーの権限設定確認
+- 接続タイムアウト・リトライ設定
+
+---
+
 ## **更新履歴**
 
-- 2025/06/11: Next.js 15 + React 19対応のセキュリティ・テスト戦略を追加、最新のベストプラクティスを反映
+- 2025/06/11: Next.js 15 + React 19対応のセキュリティ・テスト戦略を追加、本番環境エラー対応のベストプラクティスを追加
