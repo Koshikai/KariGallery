@@ -7,10 +7,28 @@ import type { ArtworkWithImages } from '@/types/database'
 import { DeleteArtworkButton } from './delete-artwork-button'
 
 export default async function AdminArtworksPage() {
-  const artworks = await getAllArtworks()
+  let artworks: ArtworkWithImages[] = []
+  let error = null
 
+  try {
+    artworks = await getAllArtworks()
+  } catch (err) {
+    error = err instanceof Error ? err.message : 'データベース接続エラー'
+    console.error('作品データ取得エラー:', err)
+  }
   return (
     <div className="space-y-8">
+      {/* エラー表示 */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+          <h3 className="text-lg font-medium text-red-800 mb-2">データベース接続エラー</h3>
+          <p className="text-red-600">{error}</p>
+          <p className="text-sm text-red-500 mt-2">
+            Supabaseの設定を確認してください。
+          </p>
+        </div>
+      )}
+
       {/* ヘッダー */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
