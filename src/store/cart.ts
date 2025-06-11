@@ -21,19 +21,25 @@ export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
-      
-      addToCart: (artwork) => {
+        addToCart: (artwork) => {
+        console.log('🛒 Store addToCart called with:', artwork.id, artwork.title)
         const currentItems = get().items
+        console.log('🛒 Current items in store:', currentItems)
         const existingItem = currentItems.find(item => item.artwork.id === artwork.id)
+        console.log('🛒 Existing item found:', existingItem)
         
         if (existingItem) {
           // アート作品は通常1点のみなので、既にカートにある場合は何もしない
+          console.log('🛒 Item already exists, not adding')
           return
         }
         
+        const newItems = [...currentItems, { artwork, quantity: 1 }]
+        console.log('🛒 Setting new items:', newItems)
         set({
-          items: [...currentItems, { artwork, quantity: 1 }]
+          items: newItems
         })
+        console.log('🛒 Items updated successfully')
       },
       
       removeFromCart: (artworkId) => {

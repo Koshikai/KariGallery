@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ShoppingBag, Menu, X } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCartStore } from '@/store/cart'
 import { Button } from '@/components/ui/button'
 
@@ -18,7 +18,13 @@ const navigationItems = [
 export function Navigation() {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
+  const [isClient, setIsClient] = useState(false)
   const totalItems = useCartStore(state => state.getTotalItems())
+
+  // クライアント側でのみカート数を表示するためのフラグ
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   return (
     <nav className="border-b bg-white/95 backdrop-blur-sm sticky top-0 z-50">
@@ -50,12 +56,11 @@ export function Navigation() {
           </div>
 
           {/* カートとモバイルメニューボタン */}
-          <div className="flex items-center space-x-4">
-            {/* カートボタン */}
+          <div className="flex items-center space-x-4">            {/* カートボタン */}
             <Link href="/cart">
               <Button variant="outline" size="sm" className="relative">
                 <ShoppingBag className="h-4 w-4" />
-                {totalItems > 0 && (
+                {isClient && totalItems > 0 && (
                   <span className="absolute -top-2 -right-2 bg-gray-900 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                     {totalItems}
                   </span>

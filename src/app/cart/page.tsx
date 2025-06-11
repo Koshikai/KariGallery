@@ -1,47 +1,22 @@
+'use client'
+
 import Link from 'next/link'
 import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useCartStore } from '@/store/cart'
 
-// ダミーカートデータ（後でZustandストアから取得）
-const dummyCartItems = [
-  {
-    id: '1',
-    artwork: {
-      id: '1',
-      title: '夕暮れの街角',
-      slug: 'yuugure-no-machikado',
-      price: 85000,
-      medium: '水彩・紙本',
-      year_created: 2024,
-      images: [
-        { id: '1', url: '', alt: '夕暮れの街角 メイン画像', is_primary: true }
-      ]
-    },
-    quantity: 1,
-  },
-  {
-    id: '2',
-    artwork: {
-      id: '4',
-      title: '光の踊り',
-      slug: 'hikari-no-odori',
-      price: 95000,
-      medium: '油彩・キャンバス',
-      year_created: 2024,
-      images: [
-        { id: '4', url: '', alt: '光の踊り メイン画像', is_primary: true }
-      ]
-    },
-    quantity: 1,
-  },
-]
+export default function CartPage() {  const { 
+    items: cartItems, 
+    removeFromCart, 
+    updateQuantity, 
+    getTotalAmount
+  } = useCartStore()
 
-export default function CartPage() {
   // 計算
-  const subtotal = dummyCartItems.reduce((sum, item) => sum + (item.artwork.price * item.quantity), 0)
+  const subtotal = getTotalAmount()
   const shippingFee = subtotal > 100000 ? 0 : 3000 // 10万円以上で送料無料
   const total = subtotal + shippingFee
-  const isEmpty = dummyCartItems.length === 0
+  const isEmpty = cartItems.length === 0
 
   if (isEmpty) {
     return (
@@ -99,11 +74,10 @@ export default function CartPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* カート内容 */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">          {/* カート内容 */}
           <div className="lg:col-span-2 space-y-6">
-            {dummyCartItems.map((item) => (
-              <div key={item.id} className="bg-white rounded-lg shadow-sm p-6">
+            {cartItems.map((item) => (
+              <div key={item.artwork.id} className="bg-white rounded-lg shadow-sm p-6">
                 <div className="flex flex-col sm:flex-row gap-6">
                   {/* 作品画像 */}
                   <div className="flex-shrink-0">
@@ -145,10 +119,10 @@ export default function CartPage() {
                         {/* 数量調整（通常は1点もの） */}
                         <div className="flex items-center space-x-3">
                           <span className="text-sm text-gray-600">数量:</span>
-                          <div className="flex items-center border border-gray-300 rounded-md">
-                            <button 
+                          <div className="flex items-center border border-gray-300 rounded-md">                            <button 
                               className="p-1 hover:bg-gray-50 disabled:opacity-50"
                               disabled={item.quantity <= 1}
+                              onClick={() => updateQuantity(item.artwork.id, item.quantity - 1)}
                             >
                               <Minus className="h-4 w-4" />
                             </button>
@@ -158,15 +132,19 @@ export default function CartPage() {
                             <button 
                               className="p-1 hover:bg-gray-50 disabled:opacity-50"
                               disabled={item.quantity >= 1} // 通常は1点もの
+                              onClick={() => updateQuantity(item.artwork.id, item.quantity + 1)}
                             >
                               <Plus className="h-4 w-4" />
                             </button>
                           </div>
                         </div>
-                      </div>
-
-                      {/* 削除ボタン */}
-                      <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50">
+                      </div>                      {/* 削除ボタン */}
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => removeFromCart(item.artwork.id)}
+                      >
                         <Trash2 className="h-4 w-4 mr-2" />
                         削除
                       </Button>
@@ -184,7 +162,7 @@ export default function CartPage() {
               
               <div className="space-y-4">
                 <div className="flex justify-between text-gray-600">
-                  <span>小計 ({dummyCartItems.length}点)</span>
+                  <span>小計 ({cartItems.length}点)</span>
                   <span>¥{subtotal.toLocaleString()}</span>
                 </div>
                 
