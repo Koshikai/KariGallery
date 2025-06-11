@@ -153,16 +153,23 @@ export default function EditArtworkPage() {
     setSuccess('')
 
     try {
-      await updateArtwork(artworkId, formData)
-      setSuccess('作品情報を更新しました')
+      console.log('送信データ:', formData)
+      const result = await updateArtwork(artworkId, formData)
       
-      // 2秒後に一覧画面に戻る
-      setTimeout(() => {
-        router.push('/admin/artworks')
-      }, 2000)
+      if (result) {
+        setSuccess('作品情報を更新しました')
+        
+        // 2秒後に一覧画面に戻る
+        setTimeout(() => {
+          router.push('/admin/artworks')
+        }, 2000)
+      } else {
+        setError('更新に失敗しました。データベース側でエラーが発生した可能性があります。')
+      }
       
     } catch (error) {
-      setError('更新に失敗しました')
+      console.error('更新エラー:', error)
+      setError(`更新に失敗しました: ${error instanceof Error ? error.message : '予期しないエラーが発生しました'}`)
     } finally {
       setIsSaving(false)
     }

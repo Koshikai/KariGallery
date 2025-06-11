@@ -239,27 +239,45 @@ export async function updateArtwork(id: string, updates: Partial<{
   title: string
   description: string
   price: number
-  size: string
+  width: number | null
+  height: number | null
   medium: string
-  year: number
-  status: string
+  year_created: number
+  is_available: boolean
   category: string
 }>): Promise<boolean> {
   try {
-    const { error } = await supabase
+    // updated_atを自動更新
+    const updateData = {
+      ...updates,
+      updated_at: new Date().toISOString()
+    }
+
+    console.log('updateArtwork - ID:', id)
+    console.log('updateArtwork - データ:', updateData)
+
+    const { data, error } = await supabase
       .from('artworks')
-      .update(updates)
+      .update(updateData)
       .eq('id', id)
+      .select()
 
     if (error) {
       console.error('Error updating artwork:', error)
-      return false
+      console.error('Error details:', error.details)
+      console.error('Error hint:', error.hint)
+      console.error('Error message:', error.message)
+      throw new Error(`データベース更新エラー: ${error.message}`)
     }
 
+    console.log('updateArtwork - 更新成功:', data)
     return true
   } catch (error) {
     console.error('Error in updateArtwork:', error)
-    return false
+    if (error instanceof Error) {
+      throw error
+    }
+    throw new Error('予期しないエラーが発生しました')
   }
 }
 
