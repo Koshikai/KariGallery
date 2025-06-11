@@ -1,3 +1,6 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Plus, Pencil, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -6,29 +9,53 @@ import { getAllArtworks } from '@/lib/supabase/services'
 import type { ArtworkWithImages } from '@/types/database'
 import { DeleteArtworkButton } from './delete-artwork-button'
 
-export default async function AdminArtworksPage() {
-  let artworks: ArtworkWithImages[] = []
-  let error = null
+export default function AdminArtworksPage() {
+  const [artworks, setArtworks] = useState<ArtworkWithImages[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  try {
-    artworks = await getAllArtworks()
-  } catch (err) {
-    error = err instanceof Error ? err.message : 'データベース接続エラー'
-    console.error('作品データ取得エラー:', err)
+  useEffect(() => {
+    async function fetchArtworks() {
+      try {
+        setLoading(true)
+        const data = await getAllArtworks()
+        setArtworks(data)
+        setError(null)
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'データベース接続エラー'
+        setError(errorMessage)
+        console.error('作品データ取得エラー:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchArtworks()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <span className="ml-3 text-gray-600">読み込み中...</span>
+      </div>
+    )
   }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-md p-4">
+        <h3 className="text-lg font-medium text-red-800 mb-2">データベース接続エラー</h3>
+        <p className="text-red-600">{error}</p>
+        <p className="text-sm text-red-500 mt-2">
+          Supabaseの設定を確認してください。
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-8">
-      {/* エラー表示 */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <h3 className="text-lg font-medium text-red-800 mb-2">データベース接続エラー</h3>
-          <p className="text-red-600">{error}</p>
-          <p className="text-sm text-red-500 mt-2">
-            Supabaseの設定を確認してください。
-          </p>
-        </div>
-      )}
-
       {/* ヘッダー */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>

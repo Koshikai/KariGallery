@@ -2,12 +2,11 @@ import { supabase } from '@/lib/supabase/client'
 
 export default async function DatabaseTestPage() {
   let connectionStatus = 'Unknown'
-  let artworksCount = 0
   let error = null
 
   try {
     // Supabaseへの接続テスト
-    const { data, error: testError } = await supabase
+    const { error: testError } = await supabase
       .from('artworks')
       .select('count', { count: 'exact' })
       .limit(1)
@@ -17,7 +16,6 @@ export default async function DatabaseTestPage() {
       connectionStatus = 'Failed'
     } else {
       connectionStatus = 'Success'
-      artworksCount = data.length
     }
   } catch (err) {
     error = err instanceof Error ? err.message : 'Unknown error'
