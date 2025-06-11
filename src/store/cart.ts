@@ -1,15 +1,15 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Artwork } from '@/types/database'
+import type { ArtworkWithImages } from '@/types/database'
 
 export interface CartItem {
-  artwork: Artwork
+  artwork: ArtworkWithImages
   quantity: number
 }
 
 interface CartState {
   items: CartItem[]
-  addToCart: (artwork: Artwork) => void
+  addToCart: (artwork: ArtworkWithImages) => void
   removeFromCart: (artworkId: string) => void
   updateQuantity: (artworkId: string, quantity: number) => void
   clearCart: () => void

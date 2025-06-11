@@ -3,7 +3,9 @@
 import Link from 'next/link'
 import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { ArtworkImage } from '@/components/ui/artwork-image'
 import { useCartStore } from '@/store/cart'
+import { getPrimaryImageUrl } from '@/lib/supabase/services'
 
 export default function CartPage() {  const { 
     items: cartItems, 
@@ -74,24 +76,28 @@ export default function CartPage() {  const {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">          {/* カート内容 */}
-          <div className="lg:col-span-2 space-y-6">
-            {cartItems.map((item) => (
-              <div key={item.artwork.id} className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex flex-col sm:flex-row gap-6">
-                  {/* 作品画像 */}
-                  <div className="flex-shrink-0">
-                    <Link 
-                      href={`/artwork/${item.artwork.slug}`}
-                      className="block"
-                    >
-                      <div className="w-full sm:w-32 aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden hover:opacity-80 transition-opacity">
-                        <div className="w-full h-full flex items-center justify-center">
-                          <span className="text-gray-400 text-sm">作品画像</span>
-                        </div>
-                      </div>
-                    </Link>
-                  </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">          {/* カート内容 */}          <div className="lg:col-span-2 space-y-6">
+            {cartItems.map((item) => {
+              const primaryImageUrl = getPrimaryImageUrl(item.artwork)
+              
+              return (
+                <div key={item.artwork.id} className="bg-white rounded-lg shadow-sm p-6">
+                  <div className="flex flex-col sm:flex-row gap-6">
+                    {/* 作品画像 */}
+                    <div className="flex-shrink-0">
+                      <Link 
+                        href={`/artwork/${item.artwork.slug}`}
+                        className="block"
+                      >
+                        <ArtworkImage
+                          src={primaryImageUrl}
+                          alt={item.artwork.title}
+                          className="w-full sm:w-32 aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
+                          width={128}
+                          height={128}
+                        />
+                      </Link>
+                    </div>
 
                   {/* 作品情報 */}
                   <div className="flex-1 space-y-4">
@@ -148,11 +154,11 @@ export default function CartPage() {  const {
                         <Trash2 className="h-4 w-4 mr-2" />
                         削除
                       </Button>
-                    </div>
-                  </div>
+                    </div>                  </div>
                 </div>
               </div>
-            ))}
+            )
+            })}
           </div>
 
           {/* 注文サマリー */}
