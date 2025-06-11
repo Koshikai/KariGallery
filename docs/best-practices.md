@@ -1,5 +1,69 @@
 # **ベストプラクティスと今後の展開**
 
+**最終更新**: 2025年6月11日（データ型統一と画像表示ベストプラクティス追加）
+
+## **データ管理と画像表示のベストプラクティス** 🖼️ NEW!
+
+### **型安全性の確保**
+
+**一貫したデータ型の使用** (2025年6月11日更新)
+- **ArtworkWithImages型の統一使用**: 画像情報を含む作品データの一貫した管理
+- **型の一元管理**: `@/types/database.ts`での型定義の統一
+- **コンポーネント間の型整合性**: カートストア、ページコンポーネント、ヘルパー関数で同一型を使用
+
+```typescript
+// 推奨パターン
+export interface CartItem {
+  artwork: ArtworkWithImages  // 画像情報を含む
+  quantity: number
+}
+
+// 非推奨パターン
+export interface CartItem {
+  artwork: Artwork  // 画像情報が欠如
+  quantity: number
+}
+```
+
+### **画像表示の最適化**
+
+**共通コンポーネントの活用**
+- **ArtworkImageコンポーネント**: エラーハンドリング、ローディング状態、プレースホルダー表示
+- **getPrimaryImageUrl()ヘルパー**: メイン画像の一貫した取得
+- **画像URL生成の中央集権化**: Supabase Storageとの統合
+
+```typescript
+// 推奨パターン
+const primaryImageUrl = getPrimaryImageUrl(artwork)
+<ArtworkImage
+  src={primaryImageUrl}
+  alt={artwork.title}
+  className="aspect-square"
+/>
+
+// 非推奨パターン
+<div className="bg-gray-200">
+  <span>作品画像</span> {/* ハードコードされたプレースホルダー */}
+</div>
+```
+
+### **データフェッチの統一**
+
+**画像情報を含むデータ取得**
+- **Supabaseクエリの統一**: 常に`artwork_images`を含むselect文を使用
+- **キャッシュ戦略**: Next.js 15の新しいキャッシュ動作に対応
+- **エラーハンドリング**: 画像が存在しない場合の適切な処理
+
+```typescript
+// 推奨パターン
+const { data, error } = await supabase
+  .from('artworks')
+  .select(`
+    *,
+    artwork_images (*)
+  `)
+```
+
 ## **アプリケーションのセキュリティ基礎**
 
 ### **APIキーとシークレットの安全な取り扱い**
