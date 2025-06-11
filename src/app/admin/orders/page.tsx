@@ -84,9 +84,8 @@ export default async function AdminOrdersPage() {
   const shippedOrders = orders.filter(order => order.status === 'shipped').length
 
   return (
-    <div className="space-y-8">
-      {/* ヘッダー */}
-      <div className="flex justify-between items-center">
+    <div className="space-y-8">      {/* ヘッダー */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">注文管理</h1>
           <p className="text-gray-600 mt-1">顧客からの注文を管理できます</p>
@@ -150,43 +149,100 @@ export default async function AdminOrdersPage() {
         {orders.length === 0 ? (
           <div className="p-8 text-center">
             <p className="text-gray-500">注文がまだありません</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    注文番号
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    顧客情報
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    商品
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    金額
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ステータス
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    注文日
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    操作
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {orders.map((order) => (
-                  <OrderTableRow key={order.id} order={order} />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          </div>        ) : (
+          <>
+            {/* デスクトップ: テーブル表示 */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      注文番号
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      顧客情報
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      商品
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      金額
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      ステータス
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      注文日
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      操作
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {orders.map((order) => (
+                    <OrderTableRow key={order.id} order={order} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* モバイル: カード表示 */}
+            <div className="md:hidden space-y-4 p-4">
+              {orders.map((order) => (
+                <OrderMobileCard key={order.id} order={order} />
+              ))}
+            </div>
+          </>
         )}
+      </div>
+    </div>
+  )
+}
+
+// モバイル用カードコンポーネント
+function OrderMobileCard({ order }: { order: OrderWithItems }) {
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+      <div className="space-y-3">
+        {/* 注文番号とステータス */}
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-medium text-gray-900">
+            #{order.id.slice(0, 8)}
+          </h3>
+          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
+            {getStatusText(order.status)}
+          </span>
+        </div>
+
+        {/* 顧客情報 */}
+        <div>
+          <p className="text-sm font-medium text-gray-900">{order.customer_name}</p>
+          <p className="text-sm text-gray-500">{order.customer_email}</p>
+        </div>
+
+        {/* 商品情報 */}        <div>
+          <p className="text-sm font-medium text-gray-700 mb-1">注文商品:</p>
+          {order.order_items.map((item) => (
+            <p key={item.id} className="text-sm text-gray-600">
+              {item.artworks.title} × {item.quantity}
+            </p>
+          ))}
+        </div>
+
+        {/* 金額と注文日 */}
+        <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+          <div>
+            <p className="text-lg font-semibold text-gray-900">¥{order.total_amount.toLocaleString()}</p>
+            <p className="text-sm text-gray-500">{formatDate(order.created_at)}</p>
+          </div>
+          <Link href={`/admin/orders/${order.id}`}>
+            <Button variant="outline" size="sm">
+              <Eye className="h-4 w-4 mr-2" />
+              詳細
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   )
@@ -232,4 +288,4 @@ function OrderTableRow({ order }: { order: OrderWithItems }) {
       </td>
     </tr>
   )
-} 
+}

@@ -1,8 +1,64 @@
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import Link from 'next/link'
-import { ShoppingBag, Package, LogOut, Home } from 'lucide-react'
+import { ShoppingBag, Package, LogOut, Home, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+
+// モバイルメニューコンポーネント
+function MobileMenuButton() {
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      className="md:hidden"
+      onClick={() => {
+        const menu = document.getElementById('mobile-menu')
+        menu?.classList.toggle('hidden')
+      }}
+    >
+      <Menu className="h-4 w-4" />
+    </Button>
+  )
+}
+
+function MobileMenu() {
+  return (
+    <div id="mobile-menu" className="hidden md:hidden bg-white border-t border-gray-200">
+      <div className="px-4 py-3 space-y-3">
+        <Link
+          href="/admin/artworks"
+          className="flex items-center space-x-3 text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-base font-medium"
+        >
+          <ShoppingBag className="h-5 w-5" />
+          <span>作品管理</span>
+        </Link>
+        <Link
+          href="/admin/orders"
+          className="flex items-center space-x-3 text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-base font-medium"
+        >
+          <Package className="h-5 w-5" />
+          <span>注文管理</span>
+        </Link>
+        <div className="border-t border-gray-200 pt-3">
+          <Link
+            href="/"
+            className="flex items-center space-x-3 text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-base font-medium"
+          >
+            <Home className="h-5 w-5" />
+            <span>サイトを見る</span>
+          </Link>
+          <Link
+            href="/admin/logout"
+            className="flex items-center space-x-3 text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-base font-medium"
+          >
+            <LogOut className="h-5 w-5" />
+            <span>ログアウト</span>
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default async function AdminLayout({
   children,
@@ -25,7 +81,6 @@ export default async function AdminLayout({
   if (!isAuthenticated) {
     redirect('/admin/login')
   }
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 管理画面ヘッダー */}
@@ -33,9 +88,10 @@ export default async function AdminLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <h1 className="text-xl font-semibold text-gray-900">
+              <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
                 KariGallery 管理画面
               </h1>
+              {/* デスクトップナビゲーション */}
               <nav className="hidden md:flex space-x-6">
                 <Link
                   href="/admin/artworks"
@@ -53,25 +109,33 @@ export default async function AdminLayout({
                 </Link>
               </nav>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-700">
+            
+            {/* ヘッダー右側 */}
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <span className="hidden sm:inline text-sm text-gray-700">
                 管理者
               </span>
-              <Link href="/">
+              <Link href="/" className="hidden sm:block">
                 <Button variant="outline" size="sm">
                   <Home className="h-4 w-4 mr-2" />
                   サイトを見る
                 </Button>
               </Link>
-              <Link href="/admin/logout">
+              <Link href="/admin/logout" className="hidden sm:block">
                 <Button variant="outline" size="sm">
                   <LogOut className="h-4 w-4 mr-2" />
                   ログアウト
                 </Button>
               </Link>
+              
+              {/* モバイルメニューボタン */}
+              <MobileMenuButton />
             </div>
           </div>
         </div>
+        
+        {/* モバイルナビゲーション */}
+        <MobileMenu />
       </header>
 
       {/* メインコンテンツ */}

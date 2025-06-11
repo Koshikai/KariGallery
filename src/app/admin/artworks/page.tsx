@@ -12,13 +12,13 @@ export default async function AdminArtworksPage() {
   return (
     <div className="space-y-8">
       {/* ヘッダー */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">作品管理</h1>
           <p className="text-gray-600 mt-1">作品の追加、編集、削除を行えます</p>
         </div>
         <Link href="/admin/artworks/new">
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
             新規作品追加
           </Button>
@@ -83,40 +83,113 @@ export default async function AdminArtworksPage() {
             </Link>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    作品
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    価格
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ステータス
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    作成年
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    操作
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {artworks.map((artwork: ArtworkWithImages) => (
-                  <ArtworkTableRow key={artwork.id} artwork={artwork} />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <>
+            {/* デスクトップ: テーブル表示 */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      作品
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      価格
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      ステータス
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      作成年
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      操作
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {artworks.map((artwork: ArtworkWithImages) => (
+                    <ArtworkTableRow key={artwork.id} artwork={artwork} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* モバイル: カード表示 */}
+            <div className="md:hidden space-y-4 p-4">
+              {artworks.map((artwork: ArtworkWithImages) => (
+                <ArtworkMobileCard key={artwork.id} artwork={artwork} />
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>
   )
 }
 
+// モバイル用カードコンポーネント
+function ArtworkMobileCard({ artwork }: { artwork: ArtworkWithImages }) {
+  const primaryImageUrl = artwork.artwork_images && artwork.artwork_images.length > 0 
+    ? artwork.artwork_images[0].image_url 
+    : ''
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+      <div className="flex items-start space-x-4">
+        <div className="flex-shrink-0">
+          <ArtworkImage
+            src={primaryImageUrl}
+            alt={artwork.title}
+            className="h-20 w-20 rounded-lg object-cover"
+            width={80}
+            height={80}
+          />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 truncate">
+                {artwork.title}
+              </h3>
+              <p className="text-sm text-gray-500">{artwork.medium}</p>
+              <p className="text-lg font-semibold text-gray-900 mt-1">
+                ¥{artwork.price.toLocaleString()}
+              </p>
+            </div>
+            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+              artwork.is_available
+                ? 'bg-green-100 text-green-800'
+                : 'bg-red-100 text-red-800'
+            }`}>
+              {artwork.is_available ? '販売中' : '売約済み'}
+            </span>
+          </div>
+          <div className="flex items-center justify-between mt-3">
+            <span className="text-sm text-gray-500">{artwork.year_created}年</span>
+            <div className="flex space-x-2">
+              <Link href={`/artwork/${artwork.slug}`}>
+                <Button variant="outline" size="sm">
+                  <Eye className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Link href={`/admin/artworks/${artwork.id}/edit`}>
+                <Button variant="outline" size="sm">
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              </Link>
+              <DeleteArtworkButton 
+                artworkId={artwork.id} 
+                artworkTitle={artwork.title} 
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// デスクトップ用テーブル行コンポーネント
 function ArtworkTableRow({ artwork }: { artwork: ArtworkWithImages }) {
   const primaryImageUrl = artwork.artwork_images && artwork.artwork_images.length > 0 
     ? artwork.artwork_images[0].image_url 
@@ -180,4 +253,4 @@ function ArtworkTableRow({ artwork }: { artwork: ArtworkWithImages }) {
       </td>
     </tr>
   )
-} 
+}
