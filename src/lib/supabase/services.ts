@@ -1,4 +1,4 @@
-import { supabase } from './client'
+import { supabase, supabaseAdmin } from './client'
 import type { ArtworkWithImages, ArtworkImage, ArtistProfile } from '@/types/database'
 
 // アーティストプロフィールを取得
@@ -217,7 +217,7 @@ export async function getArtworkById(id: string): Promise<ArtworkWithImages | nu
       .from('artworks')
       .select(`
         *,
-        images:artwork_images(*)
+        artwork_images (*)
       `)
       .eq('id', id)
       .single()
@@ -256,7 +256,8 @@ export async function updateArtwork(id: string, updates: Partial<{
     console.log('updateArtwork - ID:', id)
     console.log('updateArtwork - データ:', updateData)
 
-    const { data, error } = await supabase
+    // 管理操作なのでService Role権限を使用
+    const { data, error } = await supabaseAdmin
       .from('artworks')
       .update(updateData)
       .eq('id', id)
@@ -267,7 +268,13 @@ export async function updateArtwork(id: string, updates: Partial<{
       console.error('Error details:', error.details)
       console.error('Error hint:', error.hint)
       console.error('Error message:', error.message)
+      console.error('Error code:', error.code)
       throw new Error(`データベース更新エラー: ${error.message}`)
+    }
+
+    if (!data || data.length === 0) {
+      console.error('No rows were updated. ID might not exist:', id)
+      throw new Error('更新対象の作品が見つかりません')
     }
 
     console.log('updateArtwork - 更新成功:', data)
@@ -284,8 +291,8 @@ export async function updateArtwork(id: string, updates: Partial<{
 // 作品の削除
 export async function deleteArtwork(id: string): Promise<boolean> {
   try {
-    // まず関連する画像を削除
-    const { error: imageError } = await supabase
+    // まず関連する画像を削除 - 管理操作なのでService Role権限を使用
+    const { error: imageError } = await supabaseAdmin
       .from('artwork_images')
       .delete()
       .eq('artwork_id', id)
@@ -295,8 +302,8 @@ export async function deleteArtwork(id: string): Promise<boolean> {
       return false
     }
 
-    // 次に作品を削除
-    const { error } = await supabase
+    // 次に作品を削除 - 管理操作なのでService Role権限を使用
+    const { error } = await supabaseAdmin
       .from('artworks')
       .delete()
       .eq('id', id)
@@ -328,7 +335,8 @@ export async function createArtwork(artworkData: {
   is_featured?: boolean
 }): Promise<string | null> {
   try {
-    const { data, error } = await supabase
+    // 管理操作なのでService Role権限を使用
+    const { data, error } = await supabaseAdmin
       .from('artworks')
       .insert([{
         ...artworkData,
